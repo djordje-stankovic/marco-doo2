@@ -1997,9 +1997,13 @@ main {
 
   .nav__link i { display: inline; margin-right: 10px; color: var(--gold); }
 
-  .nav__link:hover,
+  .nav__link:hover {
+    background: rgba(255,255,255,0.05);
+  }
+
   .nav__link.active {
-    background: rgba(201, 168, 76, 0.08);
+    background: rgba(201, 168, 76, 0.1);
+    color: var(--gold);
   }
 
   .nav__menu-cta {
