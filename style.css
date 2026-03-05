@@ -1983,7 +1983,7 @@ main {
     flex-direction: column;
     align-items: flex-start;
     padding: 100px 30px 40px;
-    gap: 4px;
+    gap: 8px;
     z-index: 1000;
     transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     overflow-y: auto;
@@ -1993,8 +1993,11 @@ main {
   .nav__menu.active { right: 0; }
 
   .nav__link {
-    font-size: 1.05rem;
-    padding: 14px 16px;
+    font-size: 1.1rem;
+    padding: 18px 20px;
+    min-height: 56px;
+    display: flex;
+    align-items: center;
     width: 100%;
     border-radius: 10px;
   }
@@ -2010,7 +2013,7 @@ main {
     color: var(--gold);
     border-left: 3px solid var(--gold);
     border-radius: 0 10px 10px 0;
-    padding-left: 13px;
+    padding-left: 17px;
   }
 
   .nav__menu-cta {
