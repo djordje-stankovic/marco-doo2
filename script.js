@@ -232,12 +232,16 @@
     var energyGlow = document.getElementById('energyGlow');
     var container = document.getElementById('pipelineContainer');
 
-    // Null checks
     if (!svg || !pipeBg || !pipeDrawn || !energyDot || !container) return;
 
     var isMobile = window.innerWidth < 768;
     var totalLength = 0;
-    var ticking = false;
+
+    // Remove expensive glow filter on mobile for smooth performance
+    if (isMobile) {
+      pipeDrawn.removeAttribute('filter');
+      energyDot.removeAttribute('filter');
+    }
 
     // Generate a serpentine path that weaves through the page
     function generatePath() {
@@ -270,13 +274,11 @@
     }
 
     function setupPipeline() {
-      // Privremeno sakrij pipeline da ne utiče na merenje visine
       container.style.display = 'none';
       var pageHeight = document.documentElement.scrollHeight;
       var viewWidth = window.innerWidth;
       container.style.display = '';
 
-      // Set SVG viewBox to match the full page dimensions
       container.style.height = pageHeight + 'px';
       svg.setAttribute('viewBox', '0 0 ' + viewWidth + ' ' + pageHeight);
 
@@ -284,7 +286,6 @@
       pipeBg.setAttribute('d', pathData);
       pipeDrawn.setAttribute('d', pathData);
 
-      // Setup stroke-dasharray for draw animation
       var pathLength = pipeDrawn.getTotalLength();
       pipeDrawn.style.strokeDasharray = pathLength;
       pipeDrawn.style.strokeDashoffset = pathLength;
@@ -292,7 +293,6 @@
       return pathLength;
     }
 
-    // Move the pipeline container inside <main> if not already there
     var mainEl = document.querySelector('main');
     if (mainEl && container.parentElement !== mainEl) {
       mainEl.insertBefore(container, mainEl.firstChild);
@@ -303,7 +303,7 @@
 
     totalLength = setupPipeline();
 
-    // Pre-cache path points for smooth mobile performance
+    // Pre-cache path points
     var cachedPoints = [];
     var CACHE_STEPS = 200;
 
@@ -321,20 +321,23 @@
     }
     cachePoints();
 
-    function onScroll() {
-      var scrollTop = window.pageYOffset;
-      var pageHeight = document.documentElement.scrollHeight - window.innerHeight;
-      if (pageHeight <= 0) return;
+    // Smooth lerp animation - interpolates toward target for buttery scroll
+    var targetProgress = 0;
+    var currentProgress = 0;
+    var animating = false;
+    var LERP_SPEED = isMobile ? 0.08 : 0.12;
 
-      var progress = Math.min(Math.max(scrollTop / pageHeight, 0), 1);
+    function lerp(a, b, t) {
+      return a + (b - a) * t;
+    }
 
-      // Draw the pipe progressively
+    function updatePipeline(progress) {
       pipeDrawn.style.strokeDashoffset = totalLength * (1 - progress);
 
-      // Look up cached point instead of expensive getPointAtLength()
       var idx = Math.round(progress * CACHE_STEPS);
       var point = cachedPoints[idx];
       if (point) {
+        // Use transform instead of cx/cy for GPU-composited movement
         energyDot.setAttribute('cx', point.x);
         energyDot.setAttribute('cy', point.y);
         if (energyGlow) {
@@ -342,38 +345,66 @@
           energyGlow.setAttribute('cy', point.y);
         }
       }
-
-      ticking = false;
     }
 
-    window.addEventListener('scroll', function() {
-      if (!ticking) {
-        requestAnimationFrame(onScroll);
-        ticking = true;
+    function animateLoop() {
+      // Lerp toward target for smooth, non-janky animation
+      currentProgress = lerp(currentProgress, targetProgress, LERP_SPEED);
+
+      // Stop animating when close enough
+      if (Math.abs(currentProgress - targetProgress) < 0.0005) {
+        currentProgress = targetProgress;
+        updatePipeline(currentProgress);
+        animating = false;
+        return;
       }
-    }, { passive: true });
+
+      updatePipeline(currentProgress);
+      requestAnimationFrame(animateLoop);
+    }
+
+    function onScroll() {
+      var scrollTop = window.pageYOffset;
+      var pageHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (pageHeight <= 0) return;
+
+      targetProgress = Math.min(Math.max(scrollTop / pageHeight, 0), 1);
+
+      if (!animating) {
+        animating = true;
+        requestAnimationFrame(animateLoop);
+      }
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
 
     // Initial call
     onScroll();
 
-    // Resize handler - recalculate everything
+    // Resize handler
     var resizeTimer;
     window.addEventListener('resize', function() {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(function() {
         isMobile = window.innerWidth < 768;
+        LERP_SPEED = isMobile ? 0.08 : 0.12;
+        if (isMobile) {
+          pipeDrawn.removeAttribute('filter');
+          energyDot.removeAttribute('filter');
+        }
         totalLength = setupPipeline();
         cachePoints();
-        onScroll();
+        currentProgress = targetProgress;
+        updatePipeline(currentProgress);
       }, 250);
     });
 
-    // Also recalculate after page fully loads (images, fonts, etc.)
     window.addEventListener('load', function() {
       setTimeout(function() {
         totalLength = setupPipeline();
         cachePoints();
-        onScroll();
+        currentProgress = targetProgress;
+        updatePipeline(currentProgress);
       }, 1000);
     });
   })();
@@ -385,6 +416,23 @@
     if (!track || !drawn) return;
 
     var items = track.querySelectorAll('.timeline__item');
+    var tlTarget = 0;
+    var tlCurrent = 0;
+    var tlAnimating = false;
+
+    function tlAnimate() {
+      tlCurrent += (tlTarget - tlCurrent) * 0.1;
+      if (Math.abs(tlCurrent - tlTarget) < 0.1) {
+        tlCurrent = tlTarget;
+      }
+      drawn.style.height = tlCurrent + '%';
+
+      if (Math.abs(tlCurrent - tlTarget) > 0.1) {
+        requestAnimationFrame(tlAnimate);
+      } else {
+        tlAnimating = false;
+      }
+    }
 
     function onTimelineScroll() {
       var trackRect = track.getBoundingClientRect();
@@ -392,20 +440,22 @@
       var trackHeight = trackRect.height;
       var windowH = window.innerHeight;
 
-      // Calculate how far through the timeline we've scrolled
       var scrollStart = trackTop + window.pageYOffset - windowH * 0.7;
       var scrollEnd = trackTop + window.pageYOffset + trackHeight - windowH * 0.3;
       var scrollRange = scrollEnd - scrollStart;
       var progress = (window.pageYOffset - scrollStart) / scrollRange;
       progress = Math.min(Math.max(progress, 0), 1);
 
-      drawn.style.height = (progress * 100) + '%';
+      tlTarget = progress * 100;
 
-      // Activate items based on their position relative to drawn line
+      if (!tlAnimating) {
+        tlAnimating = true;
+        requestAnimationFrame(tlAnimate);
+      }
+
       items.forEach(function(item) {
         var itemRect = item.getBoundingClientRect();
-        var itemTop = itemRect.top;
-        if (itemTop < windowH * 0.75) {
+        if (itemRect.top < windowH * 0.75) {
           item.classList.add('visible');
         }
       });

@@ -83,10 +83,13 @@ main {
   position: absolute;
   top: 0;
   left: 0;
-  will-change: auto;
   width: 100%;
   height: 100%;
   overflow: visible;
+}
+
+.pipeline-drawn {
+  will-change: stroke-dashoffset;
 }
 
 /* ---- Preloader ---- */
