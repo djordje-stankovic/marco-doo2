@@ -31,7 +31,7 @@
       } else {
         header.classList.remove('scrolled');
       }
-    });
+    }, { passive: true });
   }
 
   // ---- Mobile Menu ----
@@ -135,7 +135,7 @@
       } else {
         backToTop.classList.remove('visible');
       }
-    });
+    }, { passive: true });
 
     backToTop.addEventListener('click', function() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -303,6 +303,24 @@
 
     totalLength = setupPipeline();
 
+    // Pre-cache path points for smooth mobile performance
+    var cachedPoints = [];
+    var CACHE_STEPS = 200;
+
+    function cachePoints() {
+      cachedPoints = [];
+      for (var i = 0; i <= CACHE_STEPS; i++) {
+        var len = (i / CACHE_STEPS) * totalLength;
+        try {
+          var pt = pipeDrawn.getPointAtLength(len);
+          cachedPoints.push({ x: pt.x, y: pt.y });
+        } catch(e) {
+          cachedPoints.push({ x: 0, y: 0 });
+        }
+      }
+    }
+    cachePoints();
+
     function onScroll() {
       var scrollTop = window.pageYOffset;
       var pageHeight = document.documentElement.scrollHeight - window.innerHeight;
@@ -311,21 +329,18 @@
       var progress = Math.min(Math.max(scrollTop / pageHeight, 0), 1);
 
       // Draw the pipe progressively
-      var drawLength = totalLength * (1 - progress);
-      pipeDrawn.style.strokeDashoffset = drawLength;
+      pipeDrawn.style.strokeDashoffset = totalLength * (1 - progress);
 
-      // Position the energy dot along the path
-      var pointLength = totalLength * progress;
-      try {
-        var point = pipeDrawn.getPointAtLength(pointLength);
+      // Look up cached point instead of expensive getPointAtLength()
+      var idx = Math.round(progress * CACHE_STEPS);
+      var point = cachedPoints[idx];
+      if (point) {
         energyDot.setAttribute('cx', point.x);
         energyDot.setAttribute('cy', point.y);
         if (energyGlow) {
           energyGlow.setAttribute('cx', point.x);
           energyGlow.setAttribute('cy', point.y);
         }
-      } catch(e) {
-        // Silently handle any SVG errors
       }
 
       ticking = false;
@@ -336,7 +351,7 @@
         requestAnimationFrame(onScroll);
         ticking = true;
       }
-    });
+    }, { passive: true });
 
     // Initial call
     onScroll();
@@ -348,6 +363,7 @@
       resizeTimer = setTimeout(function() {
         isMobile = window.innerWidth < 768;
         totalLength = setupPipeline();
+        cachePoints();
         onScroll();
       }, 250);
     });
@@ -356,6 +372,7 @@
     window.addEventListener('load', function() {
       setTimeout(function() {
         totalLength = setupPipeline();
+        cachePoints();
         onScroll();
       }, 1000);
     });
@@ -394,7 +411,7 @@
       });
     }
 
-    window.addEventListener('scroll', onTimelineScroll);
+    window.addEventListener('scroll', onTimelineScroll, { passive: true });
     onTimelineScroll();
   })();
 
@@ -498,9 +515,8 @@
       var scrollTop = window.pageYOffset;
       var docHeight = document.documentElement.scrollHeight - window.innerHeight;
       if (docHeight <= 0) return;
-      var progress = (scrollTop / docHeight) * 100;
-      progressBar.style.width = progress + '%';
-    });
+      progressBar.style.width = (scrollTop / docHeight) * 100 + '%';
+    }, { passive: true });
   })();
 
   // ===== PREMIUM FEATURE 4: Image Reveal (clip-path) =====
