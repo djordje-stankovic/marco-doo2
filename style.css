@@ -987,6 +987,32 @@ main {
   flex-wrap: wrap;
 }
 
+.cta__social {
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+  margin-top: 28px;
+}
+
+.cta__social a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.25);
+  color: #fff;
+  font-size: 1.1rem;
+  transition: background 0.3s, border-color 0.3s, color 0.3s;
+}
+
+.cta__social a:hover {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--navy);
+}
+
 /* ---- Story (O nama) ---- */
 .story__intro {
   display: grid;
