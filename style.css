@@ -539,6 +539,8 @@ main {
   margin-bottom: 24px;
 }
 
+.mob-br { display: none; }
+
 .hero__title-accent {
   color: var(--gold);
   position: relative;
@@ -2242,6 +2244,7 @@ main {
   .cta h2 { font-size: 1.8rem; }
   .cta p { text-align: center; }
   .cta__actions { flex-direction: column; align-items: center; }
+  .cta__actions .btn { min-width: 260px; text-align: center; justify-content: center; }
 
   /* Footer */
   .footer__inner {
@@ -2270,6 +2273,7 @@ main {
   .hero { min-height: 100svh; }
   .hero__content { padding: 100px 0 60px; }
   .hero__title { font-size: 2rem; }
+  .mob-br { display: inline; }
   .hero__badge { font-size: 0.75rem; padding: 6px 18px; }
   .hero__stats { gap: 16px; }
   .hero__stat-number { font-size: 1.6rem; }

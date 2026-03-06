@@ -525,10 +525,12 @@
 
     var wordsHtml = '';
     function wrapWords(text, extraClass) {
-      var words = text.replace(/<br\s*\/?>/g, ' ||BR|| ').split(/\s+/).filter(function(w) { return w; });
+      var brTags = [];
+      var words = text.replace(/<br[^>]*\/?>/g, function(match) { brTags.push(match); return ' ||BR|| '; }).split(/\s+/).filter(function(w) { return w; });
+      var brIndex = 0;
       words.forEach(function(word) {
         if (word === '||BR||') {
-          wordsHtml += '<br>';
+          wordsHtml += brTags[brIndex++] || '<br>';
         } else {
           var cls = 'word' + (extraClass ? ' ' + extraClass : '');
           wordsHtml += '<span class="' + cls + '">' + word + '</span> ';
