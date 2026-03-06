@@ -2199,7 +2199,7 @@ main {
 
   /* CTA */
   .cta h2 { font-size: 1.8rem; }
-  .cta p { text-align: left; }
+  .cta p { text-align: center; }
   .cta__actions { flex-direction: column; align-items: center; }
 
   /* Footer */
@@ -2238,9 +2238,11 @@ main {
   .services__grid { grid-template-columns: 1fr; }
   .services__card { padding: 30px 24px; }
 
-  .values__grid { grid-template-columns: 1fr 1fr; gap: 16px; }
-  .values__item { padding: 20px 12px; }
-  .values__item p { text-align: left; }
+  .values__grid { grid-template-columns: 1fr; gap: 12px; }
+  .values__item { padding: 20px; text-align: left; display: flex; align-items: center; gap: 16px; }
+  .values__item .values__icon { margin: 0; min-width: 56px; width: 56px; height: 56px; }
+  .values__item h3 { margin-bottom: 4px; }
+  .values__item p { margin: 0; }
 
   .contact__form-wrap { padding: 28px 20px; }
 
