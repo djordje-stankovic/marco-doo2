@@ -303,18 +303,22 @@
         </div>
         <div class="partners__grid">
           <div class="partners__card partners__card--dark-header tilt-card animate-on-scroll">
-            <div class="partners__logo">
-              <img src="images/fagas-logo.png" alt="FAGAS logo">
-            </div>
-            <a href="https://fagas.ba/" target="_blank" rel="noopener"><h3>FAGAS doo</h3></a>
+            <a href="https://fagas.ba/" target="_blank" rel="noopener" class="partners__link">
+              <div class="partners__logo">
+                <img src="images/fagas-logo.png" alt="FAGAS logo">
+              </div>
+              <h3>FAGAS doo</h3>
+            </a>
             <p>Fabrika gasnih aparata iz Sarajeva — projektovanje i proizvodnja gasne opreme. Sertifikovani Honeywell Gold partner.</p>
             <span class="partners__tag">Strateški partner</span>
           </div>
           <div class="partners__card tilt-card animate-on-scroll">
-            <div class="partners__logo">
-              <img src="images/paktermo-logo.png" alt="Paktermo logo">
-            </div>
-            <a href="https://paktermo.com/en/" target="_blank" rel="noopener"><h3>Paktermo AS</h3></a>
+            <a href="https://paktermo.com/en/" target="_blank" rel="noopener" class="partners__link">
+              <div class="partners__logo">
+                <img src="images/paktermo-logo.png" alt="Paktermo logo">
+              </div>
+              <h3>Paktermo AS</h3>
+            </a>
             <p>Osnovana 1988. godine, kompanija Paktermo AS nalazi se u industriji termoenergetske opreme. Strateški partner u distribuciji na teritoriji Srbije i BiH.</p>
             <span class="partners__tag">Distribucija</span>
           </div>
@@ -391,166 +395,153 @@
 
   <script src="script.js"></script>
   <script>
+  // About canvas — industrial pipe network
   (function() {
     var canvas = document.getElementById('aboutCanvas');
     if (!canvas) return;
     var ctx = canvas.getContext('2d');
     var dpr = window.devicePixelRatio || 1;
-    var w, h, nodes, pipes, particles;
-    var gold = '#c9a84c';
-    var goldLight = 'rgba(201,168,76,';
+    var w, h, segs, joints, particles, valves;
+    var g = 'rgba(201,168,76,';
+    var pw = 4; // pipe width
 
     function resize() {
-      var rect = canvas.parentElement.getBoundingClientRect();
-      w = rect.width;
-      h = rect.height;
-      canvas.width = w * dpr;
-      canvas.height = h * dpr;
+      var r = canvas.parentElement.getBoundingClientRect();
+      w = r.width; h = r.height;
+      canvas.width = w * dpr; canvas.height = h * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      init();
+      build();
     }
 
-    function init() {
-      nodes = [];
-      pipes = [];
-      particles = [];
-
-      // Create grid nodes
-      var cols = 5, rows = 4;
-      var mx = w * 0.12, my = h * 0.12;
+    function build() {
+      segs = []; joints = []; particles = []; valves = [];
+      var mx = w * 0.08, my = h * 0.08;
+      var cols = 6, rows = 5;
       var sx = (w - mx * 2) / (cols - 1);
       var sy = (h - my * 2) / (rows - 1);
+      // Grid points
+      var grid = [];
       for (var r = 0; r < rows; r++) {
+        grid[r] = [];
         for (var c = 0; c < cols; c++) {
-          var jx = (Math.random() - 0.5) * sx * 0.3;
-          var jy = (Math.random() - 0.5) * sy * 0.3;
-          nodes.push({
-            x: mx + c * sx + jx,
-            y: my + r * sy + jy,
-            r: 3 + Math.random() * 3,
-            pulse: Math.random() * Math.PI * 2,
-            isValve: Math.random() < 0.25
-          });
+          grid[r][c] = { x: mx + c * sx, y: my + r * sy };
         }
       }
-
-      // Connect nearby nodes with pipes
-      for (var i = 0; i < nodes.length; i++) {
-        for (var j = i + 1; j < nodes.length; j++) {
-          var dx = nodes[j].x - nodes[i].x;
-          var dy = nodes[j].y - nodes[i].y;
-          var dist = Math.sqrt(dx * dx + dy * dy);
-          var maxDist = Math.max(sx, sy) * 1.3;
-          if (dist < maxDist && Math.random() < 0.55) {
-            pipes.push({ a: i, b: j, flow: Math.random() * Math.PI * 2 });
+      // Horizontal pipes
+      for (var r = 0; r < rows; r++) {
+        for (var c = 0; c < cols - 1; c++) {
+          if (Math.random() < 0.6) {
+            segs.push({ ax: grid[r][c].x, ay: grid[r][c].y, bx: grid[r][c+1].x, by: grid[r][c+1].y, phase: Math.random() * 6 });
           }
         }
       }
-
-      // Seed particles
-      for (var p = 0; p < 12; p++) spawnParticle();
+      // Vertical pipes
+      for (var r = 0; r < rows - 1; r++) {
+        for (var c = 0; c < cols; c++) {
+          if (Math.random() < 0.5) {
+            segs.push({ ax: grid[r][c].x, ay: grid[r][c].y, bx: grid[r+1][c].x, by: grid[r+1][c].y, phase: Math.random() * 6 });
+          }
+        }
+      }
+      // Joints at intersections
+      for (var r = 0; r < rows; r++) {
+        for (var c = 0; c < cols; c++) {
+          var conn = 0;
+          segs.forEach(function(s) {
+            var p = grid[r][c];
+            if ((s.ax === p.x && s.ay === p.y) || (s.bx === p.x && s.by === p.y)) conn++;
+          });
+          if (conn >= 2) joints.push({ x: grid[r][c].x, y: grid[r][c].y, conn: conn });
+        }
+      }
+      // Valves on some segments
+      segs.forEach(function(s) {
+        if (Math.random() < 0.15) {
+          valves.push({ x: (s.ax + s.bx) / 2, y: (s.ay + s.by) / 2, horiz: s.ay === s.by, phase: Math.random() * 6 });
+        }
+      });
+      // Particles
+      for (var i = 0; i < 15; i++) spawnP();
     }
 
-    function spawnParticle() {
-      if (pipes.length === 0) return;
-      var pipe = pipes[Math.floor(Math.random() * pipes.length)];
-      particles.push({
-        pipe: pipe,
-        t: 0,
-        speed: 0.003 + Math.random() * 0.005,
-        size: 2 + Math.random() * 2,
-        dir: Math.random() < 0.5 ? 1 : -1
-      });
+    function spawnP() {
+      if (!segs.length) return;
+      var s = segs[Math.floor(Math.random() * segs.length)];
+      particles.push({ seg: s, t: Math.random() < 0.5 ? 0 : 1, speed: 0.002 + Math.random() * 0.003, dir: Math.random() < 0.5 ? 1 : -1 });
+    }
+
+    function drawPipe(ax, ay, bx, by, alpha) {
+      // Draw pipe with 3D effect — two lines + highlight
+      ctx.lineCap = 'round';
+      // Outer
+      ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by);
+      ctx.strokeStyle = g + (alpha * 0.5) + ')'; ctx.lineWidth = pw + 2; ctx.stroke();
+      // Inner
+      ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by);
+      ctx.strokeStyle = g + alpha + ')'; ctx.lineWidth = pw; ctx.stroke();
+      // Highlight
+      var isH = ay === by;
+      var hx = isH ? 0 : 0.8, hy = isH ? -0.8 : 0;
+      ctx.beginPath(); ctx.moveTo(ax + hx, ay + hy); ctx.lineTo(bx + hx, by + hy);
+      ctx.strokeStyle = g + (alpha * 0.3) + ')'; ctx.lineWidth = 1; ctx.stroke();
     }
 
     function draw(time) {
       ctx.clearRect(0, 0, w, h);
 
-      // Draw pipes
-      for (var i = 0; i < pipes.length; i++) {
-        var p = pipes[i];
-        var a = nodes[p.a], b = nodes[p.b];
-        var glow = 0.06 + 0.04 * Math.sin(time * 0.001 + p.flow);
+      // Pipes
+      segs.forEach(function(s) {
+        var a = 0.25 + 0.1 * Math.sin(time * 0.0008 + s.phase);
+        drawPipe(s.ax, s.ay, s.bx, s.by, a);
+      });
+
+      // Joints (flanges)
+      joints.forEach(function(j) {
+        var a = 0.3 + 0.15 * Math.sin(time * 0.001 + j.x * 0.01);
+        var r = j.conn >= 3 ? pw + 4 : pw + 2;
+        ctx.beginPath(); ctx.arc(j.x, j.y, r, 0, Math.PI * 2);
+        ctx.strokeStyle = g + a + ')'; ctx.lineWidth = 1.5; ctx.stroke();
+        ctx.fillStyle = g + (a * 0.3) + ')'; ctx.fill();
+        // Center bolt
+        ctx.beginPath(); ctx.arc(j.x, j.y, 2, 0, Math.PI * 2);
+        ctx.fillStyle = g + (a * 0.8) + ')'; ctx.fill();
+      });
+
+      // Valves
+      valves.forEach(function(v) {
+        var a = 0.4 + 0.2 * Math.sin(time * 0.0012 + v.phase);
+        var s = pw + 6;
+        ctx.save(); ctx.translate(v.x, v.y);
+        // Valve body (diamond)
         ctx.beginPath();
-        ctx.moveTo(a.x, a.y);
-        // Slight curve for organic feel
-        var mx2 = (a.x + b.x) / 2 + (a.y - b.y) * 0.1;
-        var my2 = (a.y + b.y) / 2 + (b.x - a.x) * 0.1;
-        ctx.quadraticCurveTo(mx2, my2, b.x, b.y);
-        ctx.strokeStyle = goldLight + glow + ')';
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-      }
+        ctx.moveTo(0, -s); ctx.lineTo(s, 0); ctx.lineTo(0, s); ctx.lineTo(-s, 0); ctx.closePath();
+        ctx.strokeStyle = g + a + ')'; ctx.lineWidth = 1.5; ctx.stroke();
+        ctx.fillStyle = g + (a * 0.15) + ')'; ctx.fill();
+        // Handle
+        var rot = Math.sin(time * 0.0005 + v.phase) * 0.3;
+        ctx.rotate(rot);
+        ctx.beginPath(); ctx.moveTo(0, -s - 4); ctx.lineTo(0, -s - 12);
+        ctx.strokeStyle = g + a + ')'; ctx.lineWidth = 2; ctx.stroke();
+        ctx.beginPath(); ctx.arc(0, -s - 14, 3, 0, Math.PI * 2);
+        ctx.fillStyle = g + a + ')'; ctx.fill();
+        ctx.restore();
+      });
 
-      // Draw nodes
-      for (var i = 0; i < nodes.length; i++) {
-        var n = nodes[i];
-        var pulse = 0.4 + 0.3 * Math.sin(time * 0.002 + n.pulse);
-
-        // Glow
-        ctx.beginPath();
-        ctx.arc(n.x, n.y, n.r * 3, 0, Math.PI * 2);
-        ctx.fillStyle = goldLight + (pulse * 0.15) + ')';
-        ctx.fill();
-
-        // Core
-        ctx.beginPath();
-        ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
-        ctx.fillStyle = goldLight + pulse + ')';
-        ctx.fill();
-
-        // Valve symbol
-        if (n.isValve) {
-          ctx.save();
-          ctx.translate(n.x, n.y);
-          ctx.rotate(time * 0.0005 + n.pulse);
-          ctx.beginPath();
-          ctx.moveTo(-n.r * 1.8, 0);
-          ctx.lineTo(n.r * 1.8, 0);
-          ctx.moveTo(0, -n.r * 1.8);
-          ctx.lineTo(0, n.r * 1.8);
-          ctx.strokeStyle = goldLight + (pulse * 0.5) + ')';
-          ctx.lineWidth = 1;
-          ctx.stroke();
-          ctx.restore();
-        }
-      }
-
-      // Draw & update particles
+      // Particles (gas flow)
       for (var i = particles.length - 1; i >= 0; i--) {
-        var pt = particles[i];
-        pt.t += pt.speed * pt.dir;
-        if (pt.t > 1 || pt.t < 0) {
-          particles.splice(i, 1);
-          spawnParticle();
-          continue;
-        }
-        var a = nodes[pt.pipe.a], b = nodes[pt.pipe.b];
-        var mx2 = (a.x + b.x) / 2 + (a.y - b.y) * 0.1;
-        var my2 = (a.y + b.y) / 2 + (b.x - a.x) * 0.1;
-        var t = pt.t;
-        var it = 1 - t;
-        var px = it * it * a.x + 2 * it * t * mx2 + t * t * b.x;
-        var py = it * it * a.y + 2 * it * t * my2 + t * t * b.y;
-
-        ctx.beginPath();
-        ctx.arc(px, py, pt.size, 0, Math.PI * 2);
-        ctx.fillStyle = gold;
-        ctx.fill();
-
-        // Particle trail glow
-        ctx.beginPath();
-        ctx.arc(px, py, pt.size * 3, 0, Math.PI * 2);
-        ctx.fillStyle = goldLight + '0.15)';
-        ctx.fill();
+        var p = particles[i];
+        p.t += p.speed * p.dir;
+        if (p.t > 1 || p.t < 0) { particles.splice(i, 1); spawnP(); continue; }
+        var s = p.seg;
+        var px = s.ax + (s.bx - s.ax) * p.t;
+        var py = s.ay + (s.by - s.ay) * p.t;
+        // Glow
+        ctx.beginPath(); ctx.arc(px, py, 5, 0, Math.PI * 2);
+        ctx.fillStyle = g + '0.12)'; ctx.fill();
+        // Dot
+        ctx.beginPath(); ctx.arc(px, py, 2.5, 0, Math.PI * 2);
+        ctx.fillStyle = g + '0.7)'; ctx.fill();
       }
-
-      // Center text "M" subtle watermark
-      ctx.font = '600 ' + (Math.min(w, h) * 0.25) + 'px "Playfair Display", serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillStyle = goldLight + '0.06)';
-      ctx.fillText('M', w / 2, h / 2);
 
       requestAnimationFrame(draw);
     }
