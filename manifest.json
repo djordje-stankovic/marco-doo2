@@ -1,0 +1,22 @@
+{
+  "name": "MARCO DOO",
+  "short_name": "MARCO",
+  "description": "Marketing, inženjering i konsalting. Pouzdan partner od 1993.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f1923",
+  "theme_color": "#0f1923",
+  "lang": "sr",
+  "icons": [
+    {
+      "src": "/images/viber_image_2026-03-04_09-18-24-986.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
