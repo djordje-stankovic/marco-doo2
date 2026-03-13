@@ -930,6 +930,8 @@ main {
 }
 
 .partners__logo i { font-size: 1.6rem; }
+.partners__logo--sm { width: 60px; height: 60px; }
+.partners__logo--sm i { font-size: 1.2rem; }
 .partners__logo:has(img) {
   background: none;
   border-radius: 0;
@@ -982,6 +984,122 @@ main {
   border-radius: 50px;
   text-transform: uppercase;
   letter-spacing: 1px;
+}
+
+.partners__read-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  color: var(--gold);
+  font-weight: 600;
+  font-size: 0.85rem;
+  transition: gap 0.3s ease;
+}
+
+.partners__card:hover .partners__read-more {
+  gap: 10px;
+}
+
+/* ---- Reference Modal ---- */
+.ref-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.ref-modal.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.ref-modal__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 25, 35, 0.85);
+  backdrop-filter: blur(4px);
+}
+
+.ref-modal__content {
+  position: relative;
+  background: var(--navy);
+  color: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 40px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 85vh;
+  overflow-y: auto;
+  transform: translateY(20px);
+  transition: transform 0.3s ease;
+}
+
+.ref-modal.active .ref-modal__content {
+  transform: translateY(0);
+}
+
+.ref-modal__close {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  font-size: 1.8rem;
+  color: var(--text-on-dark);
+  cursor: pointer;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.ref-modal__close:hover {
+  color: var(--gold);
+}
+
+.ref-modal__content h3 {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  color: var(--gold);
+  margin-bottom: 16px;
+}
+
+.ref-modal__content > p {
+  color: var(--text-on-dark);
+  margin-bottom: 20px;
+  line-height: 1.7;
+}
+
+.ref-modal__content ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ref-modal__content li {
+  padding-left: 20px;
+  position: relative;
+  color: var(--text-on-dark);
+  line-height: 1.6;
+}
+
+.ref-modal__content li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 10px;
+  width: 8px;
+  height: 8px;
+  background: var(--gold);
+  border-radius: 50%;
+}
+
+.ref-modal__content li strong {
+  color: var(--white);
 }
 
 /* ---- CTA ---- */

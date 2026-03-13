@@ -603,4 +603,12 @@
     }, 3000);
   })();
 
+  // ---- Reference Modal: close on Escape ----
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      var modal = document.getElementById('referenceModal');
+      if (modal) modal.classList.remove('active');
+    }
+  });
+
 })();

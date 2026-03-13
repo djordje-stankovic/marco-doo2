@@ -339,13 +339,13 @@
             <p>Osnovana 1988. godine, kompanija Paktermo AS nalazi se u industriji termoenergetske opreme. Strateški partner u distribuciji na teritoriji Srbije i BiH.</p>
             <span class="partners__tag">Distribucija</span>
           </div>
-          <div class="partners__card tilt-card animate-on-scroll">
-            <div class="partners__logo">
+          <div class="partners__card tilt-card animate-on-scroll" style="cursor:pointer" onclick="document.getElementById('referenceModal').classList.add('active')">
+            <div class="partners__logo partners__logo--sm">
               <i class="fa-solid fa-helmet-safety"></i>
             </div>
-            <h3>Industrijski klijenti</h3>
+            <h3>Reference</h3>
             <p>Snabdevamo preduzeća u Srbiji kvalitetnom gasnom opremom za industrijske, komercijalne i stambene projekte.</p>
-            <span class="partners__tag">Reference</span>
+            <span class="partners__read-more">Pročitaj više <i class="fa-solid fa-arrow-right"></i></span>
           </div>
         </div>
       </div>
@@ -568,5 +568,21 @@
     requestAnimationFrame(draw);
   })();
   </script>
+  <!-- Reference Modal -->
+  <div class="ref-modal" id="referenceModal">
+    <div class="ref-modal__overlay" onclick="this.parentElement.classList.remove('active')"></div>
+    <div class="ref-modal__content">
+      <button class="ref-modal__close" onclick="this.closest('.ref-modal').classList.remove('active')">&times;</button>
+      <h3>Reference i projekti</h3>
+      <p>Kompanija Marco doo poseduje bogatu listu referenci kroz realizaciju ključnih projekata u sektoru gasne privrede i energetike:</p>
+      <ul>
+        <li><strong>Distribucija i gasna tehnika:</strong> Dugogodišnja saradnja sa preduzećima Srbijagas, Novi Sad Gas, Temerin Gas, Gas Ruma, Srem Gas, Sloga Kanjiža.</li>
+        <li><strong>Regionalni projekti (BiH):</strong> Gasifikacija Bijeljine (Republika Srpska) i saradnja sa Sarajevo Gasom.</li>
+        <li><strong>CNG tehnologija (NIS):</strong> Izgradnja CNG punionica na dve lokacije u Novom Sadu i jedna u Čačku za potrebe NIS-a.</li>
+        <li><strong>Javni prevoz:</strong> Rekonstrukcija i proširenje kapaciteta CNG punionice za autobuse JGSP Novi Sad.</li>
+      </ul>
+    </div>
+  </div>
+
 </body>
 </html>
