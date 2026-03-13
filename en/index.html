@@ -339,13 +339,13 @@
             <p>Founded in 1988, Paktermo AS operates in the thermal energy equipment industry. Strategic partner in distribution across Serbia and Bosnia and Herzegovina.</p>
             <span class="partners__tag">Distribution</span>
           </div>
-          <div class="partners__card tilt-card animate-on-scroll">
-            <div class="partners__logo">
+          <div class="partners__card tilt-card animate-on-scroll" style="cursor:pointer" onclick="document.getElementById('referenceModal').classList.add('active')">
+            <div class="partners__logo partners__logo--sm">
               <i class="fa-solid fa-helmet-safety"></i>
             </div>
-            <h3>Industrial clients</h3>
+            <h3>References</h3>
             <p>We supply enterprises in Serbia with quality gas equipment for industrial, commercial and residential projects.</p>
-            <span class="partners__tag">References</span>
+            <span class="partners__read-more">Read more <i class="fa-solid fa-arrow-right"></i></span>
           </div>
         </div>
       </div>
@@ -568,5 +568,21 @@
     requestAnimationFrame(draw);
   })();
   </script>
+  <!-- Reference Modal -->
+  <div class="ref-modal" id="referenceModal">
+    <div class="ref-modal__overlay" onclick="this.parentElement.classList.remove('active')"></div>
+    <div class="ref-modal__content">
+      <button class="ref-modal__close" onclick="this.closest('.ref-modal').classList.remove('active')">&times;</button>
+      <h3>References and Projects</h3>
+      <p>Marco doo has an extensive list of references through the realization of key projects in the gas industry and energy sector:</p>
+      <ul>
+        <li><strong>Distribution and gas engineering:</strong> Long-standing cooperation with enterprises Srbijagas, Novi Sad Gas, Temerin Gas, Gas Ruma, Srem Gas, Sloga Kanjiza.</li>
+        <li><strong>Regional projects (BiH):</strong> Gasification of Bijeljina (Republika Srpska) and cooperation with Sarajevo Gas.</li>
+        <li><strong>CNG technology (NIS):</strong> Construction of CNG filling stations at two locations in Novi Sad and one in Cacak for the needs of NIS.</li>
+        <li><strong>Public transport:</strong> Reconstruction and capacity expansion of the CNG filling station for JGSP Novi Sad buses.</li>
+      </ul>
+    </div>
+  </div>
+
 </body>
 </html>
